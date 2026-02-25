@@ -1,22 +1,22 @@
-# Diffusion Models Evolution
+# PCB Defect Detection — Diffusion-Powered Augmentation
 
 ## Project Overview
-ML/CV portfolio project showcasing the evolution from DDPM to FLUX.1 (2024 milestone).
-Optimized for 16GB Apple Silicon Mac using GGUF quantization and CPU offloading.
+Real-world ML/CV application: generate synthetic PCB defect images with SD 1.5 + ControlNet Canny,
+then train YOLOv8 to prove augmentation improves mAP. Targets 16GB Apple Silicon.
 
 ## Key Constraints
-- 16GB unified memory: always use CPU offloading, max 512x512 resolution
-- FLUX.1-schnell: load via GGUF Q4_K_S quantization (~6.8GB)
-- SD3 Medium: drop T5-XXL encoder (`text_encoder_3=None, tokenizer_3=None`)
-- Never load both models simultaneously — clear memory between loads
+- 16GB Apple Silicon: always use CPU offloading, float16
+- SD 1.5 + ControlNet Canny: ~4-5GB total (fits easily)
+- YOLOv8s: ~2-3GB during training
+- Never load generation and detection models simultaneously
+- clear_memory() between pipeline stages
 
-## Structure
-- `config/default.py` — Central DiffusionConfig dataclass
-- `models/` — Pipeline factory, memory utils, prompt bank
-- `notebooks/` — 01-03 theory (no GPU), 04-06 demos (GPU)
-- `app/` — Gradio interactive demo
-- `scripts/` — CLI tools (generate, compare, benchmark)
+## 4-Stage Pipeline
+1. DATA: Download DeepPCB → convert to YOLO format → train/val/test split
+2. GENERATE: SD 1.5 + ControlNet Canny → synthetic defect images
+3. DETECT: YOLOv8s train on real-only vs real+synthetic → compare mAP
+4. DEMO: Gradio app for interactive defect detection
 
 ## Testing
-- `pytest tests/ -v` for unit tests (no GPU needed)
-- `python scripts/generate.py --model flux-schnell --prompt "test" --steps 1 --height 256 --width 256` for smoke test
+- `pytest tests/ -v` (no GPU needed)
+- `make download` → `make generate` → `make train` → `make demo`
