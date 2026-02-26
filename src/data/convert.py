@@ -89,16 +89,32 @@ def convert_dataset(pcb_data_dir: Path, processed_dir: Path) -> dict:
     total_defects = 0
     class_counts = {i: 0 for i in range(6)}
 
+    # DeepPCB layout: PCBData/group{ID}/{ID}/ (images) and {ID}_not/ (annotations)
     for group_dir in sorted(pcb_data_dir.iterdir()):
-        if not group_dir.is_dir():
+        if not group_dir.is_dir() or not group_dir.name.startswith("group"):
             continue
 
-        for annotation_file in sorted(group_dir.glob("*.txt")):
+        # Find the image subdir and annotation subdir
+        img_subdir = None
+        ann_subdir = None
+        for child in group_dir.iterdir():
+            if not child.is_dir():
+                continue
+            if child.name.endswith("_not"):
+                ann_subdir = child
+            else:
+                img_subdir = child
+
+        if img_subdir is None or ann_subdir is None:
+            logger.warning("Skipping group %s: missing image or annotation subdir", group_dir.name)
+            continue
+
+        for annotation_file in sorted(ann_subdir.glob("*.txt")):
             stem = annotation_file.stem
 
-            # Find corresponding images
-            test_img = group_dir / f"{stem}_test.jpg"
-            temp_img = group_dir / f"{stem}_temp.jpg"
+            # Find corresponding images in the image subdir
+            test_img = img_subdir / f"{stem}_test.jpg"
+            temp_img = img_subdir / f"{stem}_temp.jpg"
 
             if not test_img.exists():
                 skipped += 1

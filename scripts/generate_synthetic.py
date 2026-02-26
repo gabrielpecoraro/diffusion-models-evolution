@@ -30,9 +30,13 @@ def main():
                         help="Diffusion inference steps")
     parser.add_argument("--guidance", type=float, default=7.5,
                         help="Classifier-free guidance scale")
+    parser.add_argument("--no-cpu-offload", action="store_true",
+                        help="Load full pipeline on MPS/GPU (faster, uses ~5GB)")
     args = parser.parse_args()
 
-    project_config = ProjectConfig()
+    project_config = ProjectConfig(
+        enable_cpu_offload=not args.no_cpu_offload,
+    )
     gen_config = GenerationConfig(
         target_total_synthetic=args.num_images,
         controlnet_conditioning_scale=args.conditioning_scale,

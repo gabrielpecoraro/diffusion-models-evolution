@@ -42,9 +42,8 @@ def download_deeppcb(raw_dir: Path) -> dict:
     # Count files
     templates = list(pcb_data.rglob("*_temp.jpg"))
     tests = list(pcb_data.rglob("*_test.jpg"))
-    annotations = list(pcb_data.rglob("*.txt"))
-    # Filter out non-annotation txt files (like README)
-    annotations = [a for a in annotations if a.stem.isdigit() or a.stem.replace("_", "").isdigit()]
+    annotations = [a for a in pcb_data.rglob("*.txt")
+                   if "_not" in str(a.parent.name) and a.stem.isdigit()]
 
     summary = {
         "pcb_data_dir": str(pcb_data),

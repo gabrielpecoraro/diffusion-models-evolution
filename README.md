@@ -78,9 +78,9 @@ This project uses **Stable Diffusion 1.5 + ControlNet (Canny edge conditioning)*
 git clone https://github.com/gabrielpecoraro/diffusion-models-evolution.git
 cd diffusion-models-evolution
 
-# Create environment
-conda create -n pcb-defect python=3.10 -y
-conda activate pcb-defect
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
