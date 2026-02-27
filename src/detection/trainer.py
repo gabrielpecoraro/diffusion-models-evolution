@@ -61,6 +61,15 @@ def train_detector(
 
     model = YOLO(config.model_variant)
 
+    # Detect device — prefer MPS on Apple Silicon, fall back to CPU
+    import torch
+    if torch.backends.mps.is_available():
+        device = "mps"
+    elif torch.cuda.is_available():
+        device = 0
+    else:
+        device = "cpu"
+
     train_kwargs = dict(
         data=str(dataset_yaml),
         epochs=config.epochs,
@@ -75,7 +84,7 @@ def train_detector(
         project=str(output_dir),
         name=experiment_name,
         seed=42,
-        device="mps",
+        device=device,
         workers=0,
         verbose=True,
     )
